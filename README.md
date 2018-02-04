@@ -9,9 +9,13 @@ The goal of the project is to implement Model Predictive Control to drive the ca
 ## Model
 
 THe project is based on the simple kinematic model.  The vehicle state in kinematic model include for parameters [x,y,ψ,v]
+
 x - x coordinate of the vehicle
+
 y - y coordinate of the vehicle 
+
 ψ - orientation angle
+
 v - speed
 
 
