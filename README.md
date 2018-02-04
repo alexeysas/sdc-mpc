@@ -4,7 +4,8 @@ Self-Driving Car Engineer Nanodegree Program
 [//]: # (Image References)
 
 [image1]: ./images/1.png "Model"
-[image2]: ./images/2.png "Model"
+[image2]: ./images/2.png "Errors"
+[image2]: ./images/3.png "Transformation"
 
 ## Goal
 
@@ -44,11 +45,13 @@ So, the goal of the MPC is to optimize actuators of kinematic model to follow de
 Assumed we have planned path provided (desired trajectory). For this project we get this information from Unity simulator. 
 The next step is to fit polynomial which approximate desired trajectory and send it to the control block.
 
-Also, we are getting trajectory in the global coordinates, however it is beneficial to convert trajectory to the vehicle coordinates (where vehicle coordinates are (0,0) and orientation along X axes - ψ = 0). This simplifies error equzions to the simple equazions below:
+Also, we are getting trajectory in the global coordinates, however it is beneficial to convert trajectory to the vehicle coordinates (where vehicle coordinates are (0,0) and orientation along X axes - ψ = 0). This simplifies error calculations to the simple equations below:
 
 ![alt text][image2]
 
+So, before passing trajectory to the Model we preprocess coordinates to convert them to the vehicle coordinates. Here is good illustration how to achive this:
 
+![alt text][image3]
 
 ## Paramertes Tuning
 
