@@ -4,6 +4,28 @@
 #include <vector>
 #include "Eigen-3.3/Eigen/Core"
 
+// Define global constants
+#define latency  0.1
+#define Lf 2.67
+#define MhpToMs 0.44704 
+
+// Defime model tuning parameters
+#define N_Points 10
+#define dt 0.1
+
+#define SPEED_GOAL 70
+
+//Define Cost penalties
+#define CTE_PENALTY  1
+#define EPSI_PENALTY  10
+#define SPEED_PENALTY  2
+
+#define STEER_PENALTY  0
+#define A_PENALTY  0
+
+#define STEER_CHANGE_PENALTY  15000
+#define A_CHANGE_PENALTY  200
+
 using namespace std;
 
 class MPC {

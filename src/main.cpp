@@ -65,13 +65,19 @@ Eigen::VectorXd polyfit(Eigen::VectorXd xvals, Eigen::VectorXd yvals,
   return result;
 }
 
-
-vector<double>  ConvertToVehicle(double vx, double vy, double x, double y, double psi)
+// optimazied method to convert arrays of coordinates to car coordinates, 
+// assumed that vectors are equal size - no special valdiation
+void ConvertToVehicle(double vx, double vy, vector<double> &x, vector<double> &y, double psi)
 {
-      double xn = x - vx;
-      double yn = y - vy;
-      
-      return {xn*cos(-psi) - yn*sin(-psi), yn*cos(-psi) + xn*sin(-psi)};
+      double cos_psi = cos(psi);
+      double sin_psi = sin(psi);
+  
+       for (unsigned int i = 0; i < x.size(); ++i) {
+          double xn = x[i] - vx;
+          double yn = y[i] - vy;
+          x[i] = xn*cos_psi + yn*sin_psi;
+          y[i] = yn*cos_psi - xn*sin_psi; 
+       }
 }
 
 int main() {
@@ -100,8 +106,7 @@ int main() {
           double py = j[1]["y"];
           double psi = j[1]["psi"];
           double v = j[1]["speed"]; 
-          v = v *  0.44704; // convert to m/s as we have latency measured in seconds
-
+          
           /*
           * TODO: Calculate steering angle and throttle using MPC.
           *
@@ -109,59 +114,56 @@ int main() {
           *
           */
 
+          // Convert speed to m/s as we have latency measured in seconds and we need to predict
+          // car state based on latency and kinematic model
+          v = v * MhpToMs; 
+          
+          // Get current values - used for prediction of car state
           double steer_value = j[1]["steering_angle"];
           double throttle_value = j[1]["throttle"];
 
-          //Convert all stuff to vehicle coordiantes
-
-          //psi = -psi;
-          for (unsigned int i = 0; i < ptsx.size(); ++i) {
-            auto converted = ConvertToVehicle(px, py, ptsx[i], ptsy[i], psi);
-            ptsx[i] = converted[0];
-            ptsy[i] = converted[1];
-          }
-
+          // Convert waipoints to to vehicle coordiantes,
+          // Too main reasons to do this:
+          // 1. Need to draw waypoints later and simulator accepts them in vehicle coordinates
+          // 2. It is easier to calculate CTE in vehicle coordinates - just (y - f(x))
+          ConvertToVehicle(px, py, ptsx, ptsy, psi);
+       
+          // Convert vehiclae coordinates to vehicle coordinats - pretty easy :)
           px = 0;
           py = 0;
           psi = 0;
        
+          // Convert to Eighen
           Eigen::VectorXd ptsxe  = Eigen::VectorXd::Map(ptsx.data(), ptsx.size());
           Eigen::VectorXd ptsye  = Eigen::VectorXd::Map(ptsy.data(), ptsy.size());
           
+          // Fit polynomial 
           auto coeffs =  polyfit(ptsxe, ptsye, 3);
-
-          //double cte = py - polyeval(coeffs, px);
-          //double epsi = psi - atan(coeffs[1]);
-
-          double latency = 0.1;
-          double Lf = 2.67;
-
+                
+          // Predict real car position using linematic model based on latency
           double px_predicted = v * latency;
           double py_predicted = 0;
           double psi_predicted = -v * steer_value * latency / Lf;
           double v_predicted = v + throttle_value * latency;
           
+          // Calculate predicted cte and epsi based on the predicted values
           double cte = py_predicted - polyeval(coeffs, px_predicted);
           double epsi = psi_predicted - atan(coeffs[1] + 2 * coeffs[2] * px_predicted + 3 * coeffs[3] * px_predicted * px_predicted);
 
-          //double cte_predicted = cte + v * sin(epsi) * latency;
-          //double epsi_predicted = epsi + psi_predicted; 
-
-
-
+          // Create state vector and pass it to Solver 
           Eigen::VectorXd state(6);
           state << px_predicted, py_predicted, psi_predicted, v_predicted, cte, epsi;
 
-         
           auto vars = mpc.Solve(state, coeffs);
 
+          // Get steer angle and throttle_value from Solver 
           steer_value = vars[0];
           throttle_value = vars[1];
 
           json msgJson;
           // NOTE: Remember to divide by deg2rad(25) before you send the steering value back.
           // Otherwise the values will be in between [-deg2rad(25), deg2rad(25] instead of [-1, 1].
-          msgJson["steering_angle"] = steer_value / deg2rad(25) * 2.67;
+          msgJson["steering_angle"] = steer_value / deg2rad(25) * Lf;
           msgJson["throttle"] = throttle_value;
 
           //Display the MPC predicted trajectory 
@@ -185,6 +187,8 @@ int main() {
 
           //.. add (x,y) points to list here, points are in reference to the vehicle's coordinate system
           // the points in the simulator are connected by a Yellow line
+
+          // Show 25 points of referece line
           int N = 25;
           for (unsigned int i = 0; i < N; ++i) {
             double x = 0 + i * 2.25; 
