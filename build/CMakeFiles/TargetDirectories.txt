@@ -1,0 +1,3 @@
+/home/asas/Projects/SDC/Term2/sdc-mpc/build/CMakeFiles/edit_cache.dir
+/home/asas/Projects/SDC/Term2/sdc-mpc/build/CMakeFiles/rebuild_cache.dir
+/home/asas/Projects/SDC/Term2/sdc-mpc/build/CMakeFiles/mpc.dir
