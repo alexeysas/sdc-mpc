@@ -11,6 +11,9 @@ Self-Driving Car Engineer Nanodegree Program
 
 The goal of the project is to implement Model Predictive Control to drive the car around the track using simple kinematic model.
 
+Driving sample can be downloaded there:
+Video: https://github.com/alexeysas/sdc-mpc/blob/master/video/sample.mp4
+
 ## Model
 
 The project is based on the simple kinematic model.  The vehicle state in kinematic model include for parameters [x,y,ψ,v]
