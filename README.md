@@ -5,7 +5,7 @@ Self-Driving Car Engineer Nanodegree Program
 
 [image1]: ./images/1.png "Model"
 [image2]: ./images/2.png "Errors"
-[image2]: ./images/3.png "Transformation"
+[image3]: ./images/3.png "Transformation"
 
 ## Goal
 
@@ -53,9 +53,30 @@ So, before passing trajectory to the Model we preprocess coordinates to convert 
 
 ![alt text][image3]
 
+## Latency 
+
+Additionally, as we have latency between the time when we receive information about the environment and actual control commands are executed - car continue to use old control inputs for this period and changing its position and orientation.  So, we need to apply kinematic model equations to predict actual car state rather than use state which was [latency] seconds earlier to build more accurate model:
+
+ double px_predicted = v * latency;
+ 
+ double py_predicted = 0;
+ 
+ double psi_predicted = -v * steer_value * latency / Lf;
+ 
+ double v_predicted = v + throttle_value * latency;
+ 
+ Also need to calculate predicted initial errors based on new predicted car state:
+ 
+  double cte = py_predicted - polyeval(coeffs, px_predicted);
+  
+  double epsi = psi_predicted - atan(coeffs[1] + 2 * coeffs[2] * px_predicted + 3 * coeffs[3] * px_predicted * px_predicted);
+
+
+
+
 ## Paramertes Tuning
 
-## Latency 
+
 
 
 
