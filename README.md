@@ -4,6 +4,7 @@ Self-Driving Car Engineer Nanodegree Program
 [//]: # (Image References)
 
 [image1]: ./images/1.png "Model"
+[image2]: ./images/2.png "Model"
 
 ## Goal
 
@@ -21,22 +22,35 @@ y - y coordinate of the vehicle
 
 v - speed
 
-Following eequazions determine state transition for the simple kinematic model:
+Following equations determine state transition for the simple kinematic model:
 
 ![alt text][image1]
 
-Where addtional parameters are:
+Where additional parameters are:
 
-L_f -  measures the distance between the front of the vehicle and its center of gravity. The larger the vehicle, the slower the turn rate.
+Lf -  measures the distance between the front of the vehicle and its center of gravity. The larger the vehicle, the slower the turn rate.
 
-a_t -
+a - acceleration input 
 
+δ - steering angle input
 
-Also 
+[δ,a] are model actuators or control inputs
 
-## Paramertes Tuning
+So, the goal of the MPC is to optimize actuators of kinematic model to follow desired trajectory.
 
 ## Polynomial Fitting and MPC Preprocessing
+
+
+Assumed we have planned path provided (desired trajectory). For this project we get this information from Unity simulator. 
+The next step is to fit polynomial which approximate desired trajectory and send it to the control block.
+
+Also, we are getting trajectory in the global coordinates, however it is beneficial to convert trajectory to the vehicle coordinates (where vehicle coordinates are (0,0) and orientation along X axes - ψ = 0). This simplifies error equzions to the simple equazions below:
+
+![alt text][image2]
+
+
+
+## Paramertes Tuning
 
 ## Latency 
 
