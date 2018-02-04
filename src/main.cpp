@@ -139,16 +139,31 @@ int main() {
           
           // Fit polynomial 
           auto coeffs =  polyfit(ptsxe, ptsye, 3);
-                
-          // Predict real car position using linematic model based on latency
-          double px_predicted = v * latency;
-          double py_predicted = 0;
-          double psi_predicted = -v * steer_value * latency / Lf;
-          double v_predicted = v + throttle_value * latency;
+                                
+          // Predict real car position using linematic model based on latency (old version)
+          //double px_predicted = v * latency;
+          //double py_predicted = 0;
+          //double psi_predicted = -v * steer_value * latency / Lf;
+          //double v_predicted = v + throttle_value * latency;
           
           // Calculate predicted cte and epsi based on the predicted values
-          double cte = py_predicted - polyeval(coeffs, px_predicted);
-          double epsi = psi_predicted - atan(coeffs[1] + 2 * coeffs[2] * px_predicted + 3 * coeffs[3] * px_predicted * px_predicted);
+          //double cte = py_predicted - polyeval(coeffs, px_predicted);
+          //double epsi = psi_predicted - atan(coeffs[1] + 2 * coeffs[2] * px_predicted + 3 * coeffs[3] * px_predicted * px_predicted);
+
+          // Improvements according to the review
+          double cte = polyeval(coeffs, px); //Having all state variables zeros - simplified expression
+          double epsi = -atan(coeffs[1]); //Having all state variables zeros - simplified expression
+
+          //  change of sign because turning left is negative sign in simulator but positive yaw for MPC
+          double delta = -steer_value; 
+          psi = 0;
+          double px_predicted = px + v * cos(psi) * latency; 
+          double py_predicted  = py + v * sin(psi) * latency;
+          
+          cte = cte + v * sin(epsi) * latency;
+          epsi = epsi + v * delta * latency / Lf;
+          double psi_predicted  = psi +  v * delta * latency / Lf;
+          double v_predicted = v + throttle_value * latency;
 
           // Create state vector and pass it to Solver 
           Eigen::VectorXd state(6);
@@ -172,7 +187,7 @@ int main() {
 
           //.. add (x,y) points to list here, points are in reference to the vehicle's coordinate system
           // the points in the simulator are connected by a Green line
-          for (int i = 0; i < (vars.size() - 2) / 2; ++i) {
+          for (unsigned int i = 0; i < (vars.size() - 2) / 2; ++i) {
             mpc_x_vals.push_back(vars[i * 2 + 2]);
             mpc_y_vals.push_back(vars[i * 2 + 3]);
           }
@@ -189,7 +204,7 @@ int main() {
           // the points in the simulator are connected by a Yellow line
 
           // Show 25 points of referece line
-          int N = 25;
+          unsigned int N = 25;
           for (unsigned int i = 0; i < N; ++i) {
             double x = 0 + i * 2.25; 
             next_x_vals.push_back(x);

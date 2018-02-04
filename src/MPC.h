@@ -23,7 +23,7 @@
 #define STEER_PENALTY  0
 #define A_PENALTY  0
 
-#define STEER_CHANGE_PENALTY  15000
+#define STEER_CHANGE_PENALTY  10000
 #define A_CHANGE_PENALTY  200
 
 using namespace std;
