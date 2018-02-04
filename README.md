@@ -1,6 +1,9 @@
 # MPC (Model Predictive Control)
 Self-Driving Car Engineer Nanodegree Program
 
+[//]: # (Image References)
+
+[image1]: ./images/1.png "Model"
 
 ## Goal
 
@@ -18,6 +21,7 @@ y - y coordinate of the vehicle
 
 v - speed
 
+![alt text][image1]
 
 ## Paramertes Tuning
 
