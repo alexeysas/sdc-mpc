@@ -92,6 +92,35 @@ So now our state is ready to be passed to MPC solver:
 
 ## Paramertes Tuning
 
+Also there are couple model parameters to tune making model driving smooth:
+
+```c++
+#define N_Points 10
+#define dt 0.1
+
+//Define Cost penalties
+#define CTE_PENALTY  1
+#define EPSI_PENALTY  10
+#define SPEED_PENALTY  2
+
+#define STEER_PENALTY  0
+#define A_PENALTY  0
+
+#define STEER_CHANGE_PENALTY 15000
+#define A_CHANGE_PENALTY  200
+```
+
+Firstly, I selected number of points to predict controls input for: N_Points and interval for the points dt.  The final values are N = 10 and dt = 0.1. It means that we are looking ahead 1 for second.  Setting this value higher than one second, making model behavior smoother on the straight lines - however model behaves badly on the changing turns. Also setting N higher and reducing dt to still looking one second ahead increase computation complexity without any visual benefit So, I’ve ended up with the values above.
+
+Additionally, after some experiments with cost parameters tuning it appeared that trying to follow right direction (EPSI) without rabid changes in steering angle (STEER_CHANGE_PENALTY) is more important than trying to be closer to the real trajectory. So, this resulted to the fact that EPSI_PENALTY and STEER_CHANGE_PENALTY got a lot higher value than other error terms. 
+
+However, we still need to use CTE_PENALTY to make smooth corrections to real trajectory. SPEED_PENALTY is used to make car be driving with desired speed.  A_CHANGE_PENALTY is important to prevent unnecessary rapid acceleration and brakes.
+
+It looks like there is no real need to restrict absolute value of acceleration and steering angle - it has no noticeable effect on the model.
+
+
+
+
 
 
 
