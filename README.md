@@ -60,23 +60,23 @@ So, before passing trajectory to the Model we preprocess coordinates to convert 
 
 Additionally, as we have latency between the time when we receive information about the environment and actual control commands are executed - car continue to use old control inputs for this period and changing its position and orientation.  So, we need to apply kinematic model equations to predict actual car state rather than use state which was [latency] seconds earlier to build more accurate model:
 
-```c++
- double px_predicted = v * latency;
- 
- double py_predicted = 0;
- 
- double psi_predicted = -v * steer_value * latency / Lf;
- 
- double v_predicted = v + throttle_value * latency;
+```c++ 
+   
+   double delta = -steer_value; 
+   double px_predicted = px + v * cos(psi) * latency; 
+   double py_predicted  = py + v * sin(psi) * latency;
+
+   double psi_predicted  = psi +  v * delta * latency / Lf;
+   double v_predicted = v + throttle_value * latency;
+   
 ```
 
  Also need to calculate predicted initial errors based on new predicted car state:
  
  ```c++
- double cte = py_predicted - polyeval(coeffs, px_predicted);
-  
- double epsi = psi_predicted - atan(coeffs[1] + 2 * coeffs[2] * px_predicted + 3 * coeffs[3] * px_predicted * px_predicted);
-```
+    cte = cte + v * sin(epsi) * latency;
+    epsi = epsi + v * delta * latency / Lf;
+ ```
 
 Additionally, having latency specified in seconds and getting speed from sensors  in mhp we need to convert speed to m/s to correctly predict vehicle state and fit model.
 
@@ -109,7 +109,7 @@ Also there are couple model parameters to tune making model driving smooth:
 #define STEER_PENALTY  0
 #define A_PENALTY  0
 
-#define STEER_CHANGE_PENALTY 15000
+#define STEER_CHANGE_PENALTY 10000
 #define A_CHANGE_PENALTY  200
 ```
 
