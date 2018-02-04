@@ -57,6 +57,7 @@ So, before passing trajectory to the Model we preprocess coordinates to convert 
 
 Additionally, as we have latency between the time when we receive information about the environment and actual control commands are executed - car continue to use old control inputs for this period and changing its position and orientation.  So, we need to apply kinematic model equations to predict actual car state rather than use state which was [latency] seconds earlier to build more accurate model:
 
+```c++
  double px_predicted = v * latency;
  
  double py_predicted = 0;
@@ -64,12 +65,27 @@ Additionally, as we have latency between the time when we receive information ab
  double psi_predicted = -v * steer_value * latency / Lf;
  
  double v_predicted = v + throttle_value * latency;
- 
+```
+
  Also need to calculate predicted initial errors based on new predicted car state:
  
-  double cte = py_predicted - polyeval(coeffs, px_predicted);
+ ```c++
+ double cte = py_predicted - polyeval(coeffs, px_predicted);
   
-  double epsi = psi_predicted - atan(coeffs[1] + 2 * coeffs[2] * px_predicted + 3 * coeffs[3] * px_predicted * px_predicted);
+ double epsi = psi_predicted - atan(coeffs[1] + 2 * coeffs[2] * px_predicted + 3 * coeffs[3] * px_predicted * px_predicted);
+```
+
+Additionally, having latency specified in seconds and getting speed from sensors  in mhp we need to convert speed to m/s to correctly predict vehicle state and fit model.
+
+So now our state is ready to be passed to MPC solver:
+
+
+ ```c++
+  Eigen::VectorXd state(6);
+  state << px_predicted, py_predicted, psi_predicted, v_predicted, cte, epsi;
+
+  auto vars = mpc.Solve(state, coeffs);
+```
 
 
 
